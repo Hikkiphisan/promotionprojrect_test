@@ -335,7 +335,6 @@
     </tr>
     </thead>
     <tbody id="promotion-table-body">
-    <!-- Dữ liệu sẽ được thêm động từ JavaScript -->
     </tbody>
 </table>
 
@@ -343,17 +342,11 @@
 <script>
 
     function addPromotionform() {
-        // Quay lại trang chính (hoặc trang bạn muốn quay lại)
-        window.location.href = 'promotion-form.html';  // Thay '/' bằng URL của trang chính của bạn
+        window.location.href = 'promotion-form.html';
     }
 
-    // Chức năng chuyển hướng đến trang chi tiết của một khuyến mãi
-    function viewPromotionDetails(id) {
-        localStorage.setItem("promotion-id", id);
-        window.location.href = "promotion-details.html";
-    }
 
-    let promotions = []; // Mảng lưu trữ các khuyến mãi nhận được
+    let promotions = [];
 
     function fetchPromotions() {
         $.ajax({
@@ -364,8 +357,8 @@
             url: 'http://localhost:8080/api/promotions',
             type: 'GET',
             success: function(data) {
-                promotions = data; // Lưu các khuyến mãi vào mảng
-                displayPromotions(promotions); // Hiển thị tất cả khuyến mãi
+                promotions = data;
+                displayPromotions(promotions);
             },
             error: function(xhr, status, error) {
                 console.error("Lỗi khi gọi API:", status, error);
@@ -397,13 +390,11 @@
     }
 
 
-    // Chức năng sửa thông tin khuyến mãi
+
     function editPromotion(id) {
-        // Mở form sửa khuyến mãi hoặc chuyển hướng đến trang sửa khuyến mãi
         alert(`Chỉnh sửa khuyến mãi ID: ${id}`);
     }
 
-    // Chức năng xóa khuyến mãi
     function deletePromotion(id) {
         if (confirm('Bạn có chắc chắn muốn xóa khuyến mãi này?')) {
             $.ajax({
@@ -411,43 +402,40 @@
                 type: 'DELETE',
                 success: function() {
                     alert('Xóa khuyến mãi thành công');
-                    fetchPromotions(); // Cập nhật lại danh sách khuyến mãi
+                    fetchPromotions();
                 }
             });
         }
     }
     function filterPromotions() {
-        let searchTerm = document.getElementById("search-input").value.toLowerCase(); // Lấy từ khóa tìm kiếm
-        let minDiscount = parseFloat(document.getElementById("min-discount").value); // Lấy mức giảm giá tối thiểu
-        let startDateFilter = document.getElementById("start-date-filter").value; // Lấy thời gian bắt đầu
-        let endDateFilter = document.getElementById("end-date-filter").value; // Lấy thời gian kết thúc
+        let searchTerm = document.getElementById("search-input").value.toLowerCase();
+        let minDiscount = parseFloat(document.getElementById("min-discount").value);
+        let startDateFilter = document.getElementById("start-date-filter").value;
+        let endDateFilter = document.getElementById("end-date-filter").value;
 
 
-        // Chuyển đổi các trường thời gian thành đối tượng Date để so sánh
         let filteredPromotions = promotions.filter(promotion => {
-            // Kiểm tra từ khóa tìm kiếm
+
             let matchesSearchTerm = promotion.title.toLowerCase().includes(searchTerm) ||
                 promotion.details.toLowerCase().includes(searchTerm);
 
-            // Kiểm tra mức giảm giá (nếu có)
+
             let matchesDiscount = !minDiscount || promotion.discount >= minDiscount;
 
-            // Kiểm tra thời gian bắt đầu (nếu có)
             let matchesStartDate = !startDateFilter || new Date(promotion.startDate) >= new Date(startDateFilter);
 
-            // Kiểm tra thời gian kết thúc (nếu có)
+
             let matchesEndDate = !endDateFilter || new Date(promotion.endDate) <= new Date(endDateFilter);
 
 
 
-            // Lọc các khuyến mãi thỏa mãn tất cả điều kiện
             return matchesSearchTerm && matchesDiscount && matchesStartDate && matchesEndDate ;
         });
 
-        displayPromotions(filteredPromotions); // Hiển thị kết quả tìm kiếm
+        displayPromotions(filteredPromotions);
     }
 
-    // Gọi hàm fetchPromotions để lấy dữ liệu khi trang được tải
+
     fetchPromotions()
 </script>
 </body>
