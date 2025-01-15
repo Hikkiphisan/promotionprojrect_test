@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Danh sách khuyến mãi</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
         table {
             width: 100%;
@@ -63,32 +64,36 @@
             url: 'http://localhost:8080/api/promotions',
             type: 'GET',
             success: function(data) {
+                console.log("Dữ liệu nhận được:", data); // In dữ liệu nhận được vào console để kiểm tra
                 let content = "";
                 data.forEach(promotion => {
                     content += `
-                        <tr>
-                            <td>${promotion.title}</td>
-                            <td>${new Date(promotion.startDate).toLocaleString()}</td>
-                            <td>${new Date(promotion.endDate).toLocaleString()}</td>
-                            <td>${promotion.discount}%</td>
-                            <td>${promotion.details}</td>
-                            <td>
-                                <button class="btn btn-edit" onclick="editPromotion(${promotion.id})">
-                                    <i class="fas fa-edit"></i> Sửa
-                                </button>
-                                <button class="btn btn-delete" onclick="deletePromotion(${promotion.id})">
-                                    <i class="fas fa-trash"></i> Xóa
-                                </button>
-                                <button class="btn btn-view" onclick="viewPromotionDetails(${promotion.id})">
-                                    <i class="fas fa-eye"></i> Xem chi tiết
-                                </button>
-                            </td>
-                        </tr>`;
+                    <tr>
+                        <td>${promotion.title}</td>
+                        <td>${new Date(promotion.startDate).toLocaleString()}</td>
+                        <td>${new Date(promotion.endDate).toLocaleString()}</td>
+                        <td>${promotion.discount}%</td>
+                        <td>${promotion.details}</td>
+                        <td>
+                            <button class="btn btn-edit" onclick="editPromotion(${promotion.id})">
+                                <i class="fas fa-edit"></i> Sửa
+                            </button>
+                            <button class="btn btn-delete" onclick="deletePromotion(${promotion.id})">
+                                <i class="fas fa-trash"></i> Xóa
+                            </button>
+
+                        </td>
+                    </tr>`;
                 });
                 $("#promotion-table-body").html(content);
+            },
+            error: function(xhr, status, error) {
+                console.error("Lỗi khi gọi API:", status, error); // In ra lỗi nếu có
+                alert("Có lỗi khi tải dữ liệu. Vui lòng kiểm tra Console.");
             }
         });
     }
+
 
     // Chức năng sửa thông tin khuyến mãi
     function editPromotion(id) {
@@ -111,9 +116,7 @@
     }
 
     // Gọi hàm fetchPromotions để lấy dữ liệu khi trang được tải
-    $(document).ready(function() {
-        fetchPromotions();
-    });
+    fetchPromotions()
 </script>
 </body>
 </html>
