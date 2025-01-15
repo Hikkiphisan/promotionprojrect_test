@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh sách khuyến mãi</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        button {
+            padding: 5px 10px;
+            margin: 5px;
+        }
+        .add-promotion {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+<h1>Danh sách khuyến mãi</h1>
+<button class="add-promotion" onclick="addPromotion()">Thêm khuyến mãi</button>
+<table>
+    <thead>
+    <tr>
+        <th>Tiêu đề</th>
+        <th>Thời gian bắt đầu</th>
+        <th>Thời gian kết thúc</th>
+        <th>Mức giảm giá (%)</th>
+        <th>Chi tiết</th>
+        <th>Hành động</th>
+    </tr>
+    </thead>
+    <tbody id="promotion-table-body">
+    <!-- Dữ liệu sẽ được thêm động từ JavaScript -->
+    </tbody>
+</table>
+
+
+<script>
+    // Chức năng chuyển hướng đến trang chi tiết của một khuyến mãi
+    function viewPromotionDetails(id) {
+        localStorage.setItem("promotion-id", id);
+        window.location.href = "promotion-details.html";
+    }
+
+    // Lấy danh sách khuyến mãi từ API và hiển thị trên trang
+    function fetchPromotions() {
+        $.ajax({
+            headers: {
+                'accept': 'application/json',
+                'content-type': 'application/json',
+            },
+            url: 'http://localhost:8080/api/promotions',
+            type: 'GET',
+            success: function(data) {
+                let content = "";
+                data.forEach(promotion => {
+                    content += `
+                        <tr>
+                            <td>${promotion.title}</td>
+                            <td>${new Date(promotion.startDate).toLocaleString()}</td>
+                            <td>${new Date(promotion.endDate).toLocaleString()}</td>
+                            <td>${promotion.discount}%</td>
+                            <td>${promotion.details}</td>
+                            <td>
+                                <button class="btn btn-edit" onclick="editPromotion(${promotion.id})">
+                                    <i class="fas fa-edit"></i> Sửa
+                                </button>
+                                <button class="btn btn-delete" onclick="deletePromotion(${promotion.id})">
+                                    <i class="fas fa-trash"></i> Xóa
+                                </button>
+                                <button class="btn btn-view" onclick="viewPromotionDetails(${promotion.id})">
+                                    <i class="fas fa-eye"></i> Xem chi tiết
+                                </button>
+                            </td>
+                        </tr>`;
+                });
+                $("#promotion-table-body").html(content);
+            }
+        });
+    }
+
+    // Chức năng sửa thông tin khuyến mãi
+    function editPromotion(id) {
+        // Mở form sửa khuyến mãi hoặc chuyển hướng đến trang sửa khuyến mãi
+        alert(`Chỉnh sửa khuyến mãi ID: ${id}`);
+    }
+
+    // Chức năng xóa khuyến mãi
+    function deletePromotion(id) {
+        if (confirm('Bạn có chắc chắn muốn xóa khuyến mãi này?')) {
+            $.ajax({
+                url: `http://localhost:8080/api/promotions/${id}`,
+                type: 'DELETE',
+                success: function() {
+                    alert('Xóa khuyến mãi thành công');
+                    fetchPromotions(); // Cập nhật lại danh sách khuyến mãi
+                }
+            });
+        }
+    }
+
+    // Gọi hàm fetchPromotions để lấy dữ liệu khi trang được tải
+    $(document).ready(function() {
+        fetchPromotions();
+    });
+</script>
+</body>
+</html>
