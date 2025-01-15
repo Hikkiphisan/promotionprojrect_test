@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thêm Khuyến Mại</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        .promotion-form-container {
+            margin: 20px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            width: 500px;
+            background-color: #f9f9f9;
+        }
+
+        .promotion-form-container h2 {
+            text-align: center;
+        }
+
+        .promotion-form-container form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .promotion-form-container form div {
+            margin-bottom: 15px;
+        }
+
+        .promotion-form-container form label {
+            font-weight: bold;
+        }
+
+        .promotion-form-container form input,
+        .promotion-form-container form textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+
+        .promotion-form-container form button {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .promotion-form-container form button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+<div class="promotion-form-container">
+    <h2>Thêm Khuyến Mại</h2>
+    <form id="promotion-form">
+        <div>
+            <label for="title">Tiêu đề:</label>
+            <input type="text" id="title" name="title" required>
+        </div>
+
+        <div>
+            <label for="startDate">Thời gian bắt đầu:</label>
+            <input type="datetime-local" id="startDate" name="startDate" required>
+        </div>
+
+        <div>
+            <label for="endDate">Thời gian kết thúc:</label>
+            <input type="datetime-local" id="endDate" name="endDate" required>
+        </div>
+
+        <div>
+            <label for="discount">Mức giảm giá (%):</label>
+            <input type="number" id="discount" name="discount" required>
+        </div>
+
+        <div>
+            <label for="details">Chi tiết:</label>
+            <textarea id="details" name="details" required></textarea>
+        </div>
+
+        <button type="button" onclick="validateForm()">Thêm Khuyến Mại</button>
+        <button type="button" class="back-button" onclick="goBack()">Quay lại</button>
+    </form>
+</div>
+
+<script>
+
+    function goBack() {
+        // Quay lại trang chính (hoặc trang bạn muốn quay lại)
+        window.location.href = 'promotion-details.html';  // Thay '/' bằng URL của trang chính của bạn
+    }
+
+    function validateForm() {
+        // Lấy giá trị từ các trường trong form
+        const title = document.getElementById('title').value;
+        const startDate = new Date(document.getElementById('startDate').value);
+        const endDate = new Date(document.getElementById('endDate').value);
+        const discount = document.getElementById('discount').value;
+        const details = document.getElementById('details').value;
+
+        // Lấy thời gian hiện tại
+        const currentDate = new Date();
+
+        // Kiểm tra thời gian bắt đầu phải lớn hơn thời gian hiện tại
+        if (startDate <= currentDate) {
+            alert("Thời gian bắt đầu phải lớn hơn thời gian hiện tại!");
+            return false;
+        }
+
+        // Kiểm tra thời gian kết thúc phải lớn hơn thời gian bắt đầu ít nhất một ngày
+        const oneDay = 24 * 60 * 60 * 1000; // Một ngày tính theo mili giây
+        if (endDate <= startDate || (endDate - startDate) < oneDay) {
+            alert("Thời gian kết thúc phải lớn hơn thời gian bắt đầu ít nhất một ngày!");
+            return false;
+        }
+
+        // Kiểm tra mức giảm giá phải lớn hơn 10.000 VND
+        if (discount < 10) {
+            alert("Mức giảm giá phải lớn hơn 10%!");
+            return false;
+        }
+        // Nếu tất cả các điều kiện đều hợp lệ, có thể tiếp tục gửi dữ liệu hoặc thực hiện thao tác khác
+        submitForm(title, startDate, endDate, discount, details);
+    }
+
+    function submitForm(title, startDate, endDate, discount, details) {
+        // Giả sử bạn muốn gửi dữ liệu lên server hoặc thực hiện thao tác khác
+        console.log("Dữ liệu khuyến mãi đã được gửi:", {
+            title,
+            startDate,
+            endDate,
+            discount,
+            details
+        });
+
+        // Ví dụ: gửi yêu cầu AJAX đến server để lưu khuyến mãi
+        $.ajax({
+            url: 'http://localhost:8080/api/promotions',
+            type: 'POST',
+            data: JSON.stringify({
+                title: title,
+                startDate: startDate.toISOString(),
+                endDate: endDate.toISOString(),
+                discount: discount,
+                details: details
+            }),
+            contentType: 'application/json',
+            success: function(response) {
+                alert("Khuyến mãi đã được thêm thành công!");
+                // Có thể redirect hoặc thực hiện thao tác khác sau khi thành công
+            },
+            error: function(xhr, status, error) {
+                alert("Có lỗi xảy ra khi thêm khuyến mãi!");
+                console.error("Lỗi khi gửi yêu cầu:", status, error);
+            }
+        });
+    }
+</script>
+</body>
+</html>

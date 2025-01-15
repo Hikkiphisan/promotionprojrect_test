@@ -29,8 +29,20 @@
 </head>
 <body>
 <h1>Danh sách khuyến mãi</h1>
-<button class="add-promotion" onclick="addPromotion()">Thêm khuyến mãi</button>
+<button class="add-promotion" onclick="addPromotionform()">Thêm khuyến mãi</button>
+<div class="search-container">
+    <input type="text" id="search-input" placeholder="Tìm kiếm khuyến mãi...">
+
+    <input type="number" id="min-discount" placeholder="Mức giảm giá tối thiểu (%)" min="10">
+
+    <input type="date" id="start-date-filter" placeholder="Thời gian bắt đầu">
+
+    <input type="date" id="end-date-filter" placeholder="Thời gian kết thúc">
+
+    <button id="search-btn" onclick="filterPromotions()">Tìm kiếm</button>
+</div>
 <table>
+
     <thead>
     <tr>
         <th>Tiêu đề</th>
@@ -48,13 +60,20 @@
 
 
 <script>
+
+    function addPromotionform() {
+        // Quay lại trang chính (hoặc trang bạn muốn quay lại)
+        window.location.href = 'promotion-form.html';  // Thay '/' bằng URL của trang chính của bạn
+    }
+
     // Chức năng chuyển hướng đến trang chi tiết của một khuyến mãi
     function viewPromotionDetails(id) {
         localStorage.setItem("promotion-id", id);
         window.location.href = "promotion-details.html";
     }
 
-    // Lấy danh sách khuyến mãi từ API và hiển thị trên trang
+    let promotions = []; // Mảng lưu trữ các khuyến mãi nhận được
+
     function fetchPromotions() {
         $.ajax({
             headers: {
@@ -64,34 +83,36 @@
             url: 'http://localhost:8080/api/promotions',
             type: 'GET',
             success: function(data) {
-                console.log("Dữ liệu nhận được:", data); // In dữ liệu nhận được vào console để kiểm tra
-                let content = "";
-                data.forEach(promotion => {
-                    content += `
-                    <tr>
-                        <td>${promotion.title}</td>
-                        <td>${new Date(promotion.startDate).toLocaleString()}</td>
-                        <td>${new Date(promotion.endDate).toLocaleString()}</td>
-                        <td>${promotion.discount}%</td>
-                        <td>${promotion.details}</td>
-                        <td>
-                            <button class="btn btn-edit" onclick="editPromotion(${promotion.id})">
-                                <i class="fas fa-edit"></i> Sửa
-                            </button>
-                            <button class="btn btn-delete" onclick="deletePromotion(${promotion.id})">
-                                <i class="fas fa-trash"></i> Xóa
-                            </button>
-
-                        </td>
-                    </tr>`;
-                });
-                $("#promotion-table-body").html(content);
+                promotions = data; // Lưu các khuyến mãi vào mảng
+                displayPromotions(promotions); // Hiển thị tất cả khuyến mãi
             },
             error: function(xhr, status, error) {
-                console.error("Lỗi khi gọi API:", status, error); // In ra lỗi nếu có
-                alert("Có lỗi khi tải dữ liệu. Vui lòng kiểm tra Console.");
+                console.error("Lỗi khi gọi API:", status, error);
             }
         });
+    }
+
+    function displayPromotions(promotions) {
+        let content = "";
+        promotions.forEach(promotion => {
+            content += `
+            <tr>
+                <td>${promotion.title}</td>
+                <td>${new Date(promotion.startDate).toLocaleString()}</td>
+                <td>${new Date(promotion.endDate).toLocaleString()}</td>
+                <td>${promotion.discount}%</td>
+                <td>${promotion.details}</td>
+                <td>
+                    <button class="btn btn-edit" onclick="editPromotion(${promotion.id})">
+                        <i class="fas fa-edit"></i> Sửa
+                    </button>
+                    <button class="btn btn-delete" onclick="deletePromotion(${promotion.id})">
+                        <i class="fas fa-trash"></i> Xóa
+                    </button>
+                </td>
+            </tr>`;
+        });
+        $("#promotion-table-body").html(content);
     }
 
 
@@ -113,6 +134,33 @@
                 }
             });
         }
+    }
+    function filterPromotions() {
+        let searchTerm = document.getElementById("search-input").value.toLowerCase(); // Lấy từ khóa tìm kiếm
+        let minDiscount = parseFloat(document.getElementById("min-discount").value); // Lấy mức giảm giá tối thiểu
+        let startDateFilter = document.getElementById("start-date-filter").value; // Lấy thời gian bắt đầu
+        let endDateFilter = document.getElementById("end-date-filter").value; // Lấy thời gian kết thúc
+
+        // Chuyển đổi các trường thời gian thành đối tượng Date để so sánh
+        let filteredPromotions = promotions.filter(promotion => {
+            // Kiểm tra từ khóa tìm kiếm
+            let matchesSearchTerm = promotion.title.toLowerCase().includes(searchTerm) ||
+                promotion.details.toLowerCase().includes(searchTerm);
+
+            // Kiểm tra mức giảm giá (nếu có)
+            let matchesDiscount = !minDiscount || promotion.discount >= minDiscount;
+
+            // Kiểm tra thời gian bắt đầu (nếu có)
+            let matchesStartDate = !startDateFilter || new Date(promotion.startDate) >= new Date(startDateFilter);
+
+            // Kiểm tra thời gian kết thúc (nếu có)
+            let matchesEndDate = !endDateFilter || new Date(promotion.endDate) <= new Date(endDateFilter);
+
+            // Lọc các khuyến mãi thỏa mãn tất cả điều kiện
+            return matchesSearchTerm && matchesDiscount && matchesStartDate && matchesEndDate;
+        });
+
+        displayPromotions(filteredPromotions); // Hiển thị kết quả tìm kiếm
     }
 
     // Gọi hàm fetchPromotions để lấy dữ liệu khi trang được tải
